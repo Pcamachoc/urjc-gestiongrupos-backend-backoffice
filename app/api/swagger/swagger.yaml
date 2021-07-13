@@ -1,0 +1,908 @@
+swagger: "2.0"
+info:
+  version: "0.4.0"
+  title: URJC gestiongrupos Backend BackOffice
+# during dev, should point to your local machine
+host: localhost:8080
+# basePath prefixes all resource paths 
+basePath: /api
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+  - application/octet-stream
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+  - application/xml
+  
+paths:
+
+  # ##################################################################
+  # Authentication
+  # ##################################################################
+
+  /authenticate:
+    x-swagger-router-controller: auth.controller
+    post:
+      tags:
+        - "Authentication"
+      description: authenticate user
+      operationId: authenticate
+      parameters:
+        - in: header
+          name: username
+          required: true
+          type: string
+        - in: header
+          name: passwd
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AuthenticatedResponse"
+          examples: 
+            token: |
+              eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOnsiaWQiOiJ1c2VyLXVjdmI0NGt6c2p3MHB
+              mc2VwIiwibmFtZSI6ImFkbWluIiwic3VybmFtZSI6InVzdCIsInVzZXJuYW1lIjoiYWRtaW51c3QiLCJ
+              lbWFpbCI6ImFkbWludXN0QHVzdC1nbG9iYWwuY29tIiwiZW5hYmxlZCI6dHJ1ZSwiaW5pdERhdGUiOiI
+              yMDE5LTA1LTI3VDAwOjAwOjAwLjAwMFoiLCJncm91cHMiOlt7ImlkIjoiZ3JvdXAtdWN2YjQ0bDZyanc
+              wcGh3Y3QiLCJuYW1lIjoiQWRtaW5pc3RyYXRvcnMgR3JvdXAiLCJyb2xlcyI6W3siaWQiOiJyb2xlLXV
+              jdmI0NGwxNmp3MHBnaG9wIiwibmFtZSI6IlJvbGUgTWFuYWdlciIsImZ1bmN0aW9uYWxpdGllcyI6WyJ
+              jcmVhdGVSb2xlIiwidXBkYXRlUm9sZSIsImdldFJvbGVCeUlkIiwiZ2V0QWxsUm9sZXMiLCJkZWxldGV
+              Sb2xlQnlJZCIsImFkZEZ1bmMyUm9sZSIsImRlbEZ1bmMyUm9sZSJdfSx7ImlkIjoicm9sZS11Y3ZiNDR
+              sMXFqdzBwaDJudCIsIm5hbWUiOiJVc2VyIE1hbmFnZXIiLCJmdW5jdGlvbmFsaXRpZXMiOlsiY3JlYXR
+              lVXNlciIsInVwZGF0ZVVzZXIiLCJnZXRVc2VyQnlJZCIsImdldFVzZXJzIiwiZGVsZXRlVXNlckJ5SWQ
+              iLCJhZGRHcm91cDJVc2VyIiwiZGVsR3JvdXAyVXNlciJdfSx7ImlkIjoicm9sZS11Y3ZiNDRsNTJqdzB
+              waGhjMyIsIm5hbWUiOiJHcm91cCBNYW5hZ2VyIiwiZnVuY3Rpb25hbGl0aWVzIjpbImNyZWF0ZUdyb3V
+              wIiwidXBkYXRlR3JvdXAiLCJnZXRHcm91cEJ5SWQiLCJnZXRBbGxHcm91cHMiLCJkZWxldGVHcm91cEJ
+              5SWQiXX0seyJpZCI6InJvbGUtdWN2YjQ0bDY3ancwcGhxaTciLCJuYW1lIjoiQ2FtcGFpZ24gTWFuYWd
+              lciIsImZ1bmN0aW9uYWxpdGllcyI6WyJjcmVhdGVDYW1wYWlnbiIsInVwZGF0ZUNhbXBhaWduIiwiZ2V
+              0Q2FtcGFpZ25CeUlkIiwiZ2V0QWxsQ2FtcGFpZ25zIiwiZGVsZXRlQ2FtcGFpZ25CeUlkIl19XX1dfSw
+              iaWF0IjoxNTU5MDUwMTkyLCJleHAiOjE4NzQ0MTAxOTJ9.gEkxw9yfFIzoJS4axAqlI_ELvEhgQLb5iA
+              ne2xUXxBE
+        "401":
+          description: Not authenticated
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: User not authenticated
+              description: User not authenticated in [Auth Controller]:authenticate
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Auth Controller]:authenticate
+
+  # ##################################################################
+  # Calls
+  # ##################################################################
+
+  /private/calls: 
+    x-swagger-router-controller: call.controller
+    post: 
+      tags: 
+        - "Calls"
+      description: Create Call
+      operationId: createCall
+      parameters: 
+        - in: header 
+          name: authorization 
+          description: Security Token
+          required: true 
+          type: string 
+        - in: body 
+          name: callData
+          description: Call data
+          schema: 
+            $ref: "#/definitions/CallData"
+      responses: 
+        "201": 
+          description: Success 
+          schema: 
+            $ref: "#/definitions/CallDataResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string
+          examples:
+            application/json:
+              {              
+                "id": "call-ucvb83kzsjw0pfsep",
+                "name": "test call 1",
+                "subject": "Cybersecurity",
+                "initDate": "2021-06-03T00:00:00.000Z",
+                "endDate": "2021-09-15T00:00:00.000Z",
+                "statement": [{"title": "archive_ucvb83kzsjw0pfsep.pdf", "data": "<<BASE64>>"}],
+	   	          "participants": [
+	   		          {"id": "11a", "name": "Cristina Castaño", "group": 200},
+                  {"id": "22b", "name": "Ramón González", "group": 100}, 
+                ],
+              }
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:createCall
+        default: 
+          description: Error 
+          schema: 
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:createCall
+    get: 
+      tags: 
+        - "Calls" 
+      description: Get calls
+      operationId: getCalls
+      parameters: 
+        - in: header 
+          name: authorization 
+          description: Security Token 
+          required: true 
+          type: string 
+      responses: 
+        "200": 
+          description: Success 
+          schema: 
+            $ref: "#/definitions/CallsDataListResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string
+          examples:
+            application/json: {
+                "id": "call-ucvb83kzsjw0pfsep",
+                "name": "test call 1",
+                "subject": "Cybersecurity",
+                "initDate": "2021-06-03T00:00:00.000Z",
+                "endDate": "2021-09-15T00:00:00.000Z",
+                "statement": [{"title": "archive_ucvb83kzsjw0pfsep.pdf", "data": "<<BASE64>>"}],
+	   	          "participants": [
+	   		          {"id": "11a", "name": "Cristina Castaño", "group": 200},
+                  {"id": "22b", "name": "Ramón González", "group": 100}, 
+                 ],
+                "counting": [],
+                "currentResult": [],
+          }
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:getCalls
+        "404":
+          description: Calls not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: No calls found
+              description: No calls found in [Call Controller]:getCalls
+        default: 
+          description: Error 
+          schema: 
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:getCalls
+
+  /private/calls/{callId}:
+    x-swagger-router-controller: call.controller
+    delete:
+      tags:
+        - "Calls"
+      description: delete a call
+      operationId: deleteCallById
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string
+          examples:
+            message: OK
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:deleteCallById
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: User not found
+              description: User not found in [Call Controller]:deleteCallById
+        "409":
+          description: call not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 409
+              message: call not found
+              description: call not found in [Call Controller]:deleteCallById        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:deleteCallById
+    get:
+      tags:
+        - "Calls"
+      description: get specific call by id
+      operationId: getCallById
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CallData"
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:getCallById
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: User not found
+              description: User not found in [Call Controller]:getCallById
+        "409":
+          description: call not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 409
+              message: call not found
+              description: call not found in [Call Controller]:getCallById        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:getCallById
+    put:
+      tags:
+        - "Calls"
+      description: update counting fields in call
+      operationId: updateCounterCall
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CallData"
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:updateCounterCall
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: User not found
+              description: User not found in [Call Controller]:updateCounterCall
+        "409":
+          description: call not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 409
+              message: call not found
+              description: call not found in [Call Controller]:updateCounterCall        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:updateCounterCall
+    post: 
+      tags: 
+        - "Calls"
+      description: Update Call
+      operationId: updateCall
+      parameters: 
+        - in: header 
+          name: authorization 
+          description: Security Token
+          required: true 
+          type: string 
+        - in: body 
+          name: callData
+          description: Call data
+          schema: 
+            $ref: "#/definitions/CallData"
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+      responses: 
+        "201": 
+          description: Success 
+          schema: 
+            $ref: "#/definitions/CallDataResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string
+          examples:
+            application/json:
+              {              
+                "id": "call-ucvb83kzsjw0pfsep",
+                "name": "test call 1",
+                "subject": "Cybersecurity",
+                "initDate": "2021-06-03T00:00:00.000Z",
+                "endDate": "2021-09-15T00:00:00.000Z",
+                "statement": [{"title": "archive_ucvb83kzsjw0pfsep.pdf", "data": "<<BASE64>>"}],
+	   	          "participants": [
+	   		          {"id": "11a", "name": "Cristina Castaño", "group": 200},
+                  {"id": "22b", "name": "Ramón González", "group": 100}, 
+                ],
+              }
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:updateCall
+        default: 
+          description: Error 
+          schema: 
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:updateCall
+
+  /private/calls/{callId}/getBlockchainReport:
+    x-swagger-router-controller: call.controller
+    get:
+      tags:
+        - "Calls"
+      description: get blockchain report
+      operationId: getBlockchainReport
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CallData"
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Call Controller]:getCallById
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: User not found
+              description: User not found in [Call Controller]:getCallById
+        "409":
+          description: call not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 409
+              message: call not found
+              description: call not found in [Call Controller]:getCallById        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:getCallById
+
+
+  /private/votes/{callId}/uploadInPersonResults:
+    x-swagger-router-controller: vote.controller
+    post:
+      tags:
+        - "Votes"
+      description: upload in-person voting results
+      operationId: createInPersonVotes
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string
+        - in: path
+          name: callId
+          description: call Id
+          required: true
+          type: string
+        - in: body
+          name: base64File
+          description: Base64 coded votes list 
+          schema: 
+            $ref: "#/definitions/InPersonVoteListData"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string
+          examples:
+            {
+              message: 'OK',
+            }
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Vote Controller]:createInPersonVotes
+        "404":
+          description: Call not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 404
+              message: call not found
+              description: call not found in [Vote Controller]:createInPersonVotes
+        "409":
+          description: in-person voting must be summoned after or same to call end date
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 409
+              message: in-person voting must be summoned after or same to call end date
+              description: in-person voting must be summoned after or same to call end date in [Vote Controller]:createInPersonVotes        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Call Controller]:deleteCallById  
+  /private/getInPersonResultsCSVTemplate:
+    x-swagger-router-controller: vote.controller
+    get:
+      tags:
+        - "Votes"
+      description: retrieves a CSV template to help filling the in-person voting results
+      operationId: getInPersonResultsCSVTemplate
+      parameters:
+        - in: header
+          name: authorization
+          description: Security Token
+          required: true
+          type: string        
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+          headers:
+            authorization:
+              description: Security Token
+              type: string          
+        "401":
+          description: Not authenticated in the system
+          schema:
+            $ref: "#/definitions/UnauthenticatedResponse"
+          examples:
+            error:
+              code: 401
+              message: Security header not received
+              description: Security header not received in [Auth Middleware]:authenticate
+        "403":
+          description: Not authorized to execute this method
+          schema:
+            $ref: "#/definitions/UnauthorizedResponse"
+          examples:
+            error:
+              code: 403
+              message: User not authorized
+              description: User not authorized in [Vote Controller]:getInPersonResultsCSVTemplate        
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+          examples:
+            error:
+              code: 500
+              message: Internal Server Error
+              description: Internal Server Error in [Vote Controller]:getInPersonResultsCSVTemplate
+# complex objects have schema definitions
+
+definitions:
+
+  # ##################################################################
+  # REQUESTS
+  # ##################################################################
+  
+  CallData: 
+    type: object      
+    properties: 
+      name: 
+        type: string 
+      subject: 
+        type: string
+      initDate:
+        type: string
+        format: date-time
+      endDate:
+        type: string
+        format: date-time
+      statement: 
+        type: array
+        items:
+          $ref: "#/definitions/ImageObject"
+      proposals:
+        type: array
+        items:
+          $ref: "#/definitions/IdDescriptionObject"
+      participants:
+        type: array
+        items:
+          $ref: "#/definitions/IdNameGroupObject"
+
+  InPersonVoteListData: 
+    type: object      
+    properties: 
+      name: 
+        type: string
+        format: byte
+      
+
+  # ##################################################################
+  # RESPONSES
+  # ##################################################################
+
+  # General Reponses
+
+  GeneralResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string 
+
+  # Error Responses
+
+  InnerErrorResponse:
+    type: object
+    properties:
+      code:
+        type: number
+      message:
+        type: string
+      description:
+        type: string
+  
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        $ref: "#/definitions/InnerErrorResponse"
+        
+  # Authentication Responses
+
+  AuthenticatedResponse:
+    required:
+      - token
+    properties:
+      token:
+        type: string
+
+  UnauthenticatedResponse:
+    type: object
+    properties:
+      error:
+        $ref: "#/definitions/InnerErrorResponse"
+
+  # Authorization Responses
+  UnauthorizedResponse:
+    type: object
+    properties:
+      error:
+        $ref: "#/definitions/InnerErrorResponse"
+
+  # Calls Responses
+
+  ImageObject:
+    type: object
+    properties:
+      title:
+        type: string
+      data:
+        type: string
+        format: byte
+
+  NamePositionObject:
+    type: object
+    properties:
+      name:
+        type: string
+      position:
+        type: string
+
+  IdDescriptionObject:
+    type: object
+    properties:
+      id:
+        type: string
+      description:
+        type: string
+
+  IdNameGroupObject:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      group:
+        type: integer
+
+  IdproposalIdparticipantOptionObject:
+    type: object
+    properties:
+      idProposal:
+        type: string
+      idParticipant:
+        type: string
+      option:
+        type: string
+
+  IdproposalOptionGroupObject:
+    type: object
+    properties:
+      idProposal:
+        type: string
+      option:
+        type: string
+      group:
+        type: integer
+
+  CallDataResponse: 
+    type: object      
+    properties:
+      id:
+        type: string
+      name: 
+        type: string 
+      group: 
+        type: string
+      initDate:
+        type: string
+        format: date-time
+      endDate:
+        type: string
+        format: date-time
+      statement: 
+        type: array
+        items:
+          $ref: "#/definitions/ImageObject"
+      proposals:
+        type: array
+        items:
+          $ref: "#/definitions/IdDescriptionObject"
+      participants:
+        type: array
+        items: 
+          $ref: "#/definitions/IdNameGroupObject"
+      currentResult:
+        type: array
+        items:
+          $ref: "#/definitions/IdproposalIdparticipantOptionObject"
+      counting:
+        type: array
+        items:
+          $ref: "#/definitions/IdproposalOptionGroupObject"
+
+  CallsDataListResponse: 
+    type: object
+    properties:
+      totalElements:
+        type: number
+      elements:
+        type: array
+        items: 
+          $ref: "#/definitions/CallDataResponse"
+
